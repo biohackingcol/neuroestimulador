@@ -28,7 +28,7 @@ void loop()
     Serial.println(delta);
     time1=time2; //correcion, al igualar a millis no es exactamente el tiempo anterior.
     //por eso se iguala directamente a time2
-    //la correcion fue a partir de 2ArduinosPeriods1, las medidas de un solo arduino fueron con el codi
+    //la correcion fue a partir de 2ArduinosPeriods1, las medidas de un solo arduino fueron con el codigo anterior
   }
   
   //val = analogRead(detectPin);  // read the input pin
