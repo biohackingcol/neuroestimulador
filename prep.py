@@ -5,7 +5,7 @@ search=['current: ',' delta: ']
 replace=['',',']
 prepend=''
 
-#intended for measures2
+#intended for measures2 and to be used with panda
 
 directory='Y:\\y\\sync\\current\\work\\biohacking\\r&d\\nerveStimulator\\arduino\\'
 
@@ -24,7 +24,7 @@ for root, dirs, files in os.walk(directory):
                 text_to_search='current: '
                 replacement_text = ''
                 
-                #apparently prepend an endofline at the beginning
+                #apparently prepend an endOfLine at the beginning
                 with open(filename, "r+") as f: s = f.read(); f.seek(0); f.write(prepend+"\n" + s)
                 
                 for i in range(0,len(search)):
