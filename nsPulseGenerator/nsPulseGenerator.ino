@@ -72,6 +72,9 @@ void loop()
 {
 
   //we need to find a way to set the output on and off
+  // "The actual OC1x value will only be visible on the port pin if the data direction for the port pin is set as output (DDR_OC1x)."
+  // SO maybe by modifying the data direction register we cant sort of set on/off the stimulation
+  
   //VDAC could be done with a POT?
 
   while(Serial.available()) 
@@ -82,7 +85,7 @@ void loop()
   if (a == '1'){changePeriod(1e-3);a='0';}
   if (a == '2'){changePeriod(2e-3);a='0';}
   
-  analogWrite(analogPin, 255);
+  analogWrite(analogPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
 }
 
 
