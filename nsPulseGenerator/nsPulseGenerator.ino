@@ -2,6 +2,13 @@
  * Original source of this code: https://arduino.stackexchange.com/questions/45519/is-it-possible-to-obtain-0-05-duty-cycle-at-1hz-in-arduinoa-500us-square-puls @Edgar Bonet
  * Configure Timer 1 to generate a slow, low duty cycle PWM signal.
  * Output pin = digital 9 = PB1 = OC1A.
+ * Timer Reference:
+ * atmega328p datasheet https://www.sparkfun.com/datasheets/Components/SMD/ATMega328.pdf
+ * http://www.avrbeginners.net/architecture/timers/timers.html
+ * https://www.robotshop.com/community/forum/t/arduino-101-timers-and-interrupts/13072
+ * https://playground.arduino.cc/Code/BitMath/
+ * https://www.arduino.cc/en/Reference/PortManipulation
+ * https://www.microchip.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_use_bv.html
  */
 
 //For testing use period=1e-3, width=0.5e-3
