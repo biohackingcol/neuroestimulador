@@ -89,8 +89,10 @@ void loop()
     a = Serial.read();// read the incoming data as string  
     }
 
-  if (a == '1'){changePeriod(1e-3);a='0';}
-  if (a == '2'){changePeriod(2e-3);a='0';}
+  if (a == '1'){changePeriod(1e-3);a='c';}
+  if (a == '2'){changePeriod(2e-3);a='c';}
+  if (a == '0'){DDRB  = _BV(0);a='c';} // TURN OFF STIMULATION
+  if (a == '9'){DDRB  |= _BV(PB1);a='c';} //TURN ON STIMULATION
   
   analogWrite(analogPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
 }
