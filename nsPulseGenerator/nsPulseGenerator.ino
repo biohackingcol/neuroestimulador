@@ -43,7 +43,7 @@ void setup()
     //note that Pins 9 and 10 are controlled by timer1 only in the UNO
     //Servo Library uses Timer1. You can’t use PWM on Pin 9, 10 when you use the Servo Library on an Arduino.
     // we can use tone function for doc feedback because it relies on timer2
-    DDRB  |= _BV(PB1);    // set PB1 = OC1A as output
+    //DDRB  |= _BV(PB1);    // set PB1 = OC1A as output, commented so it starts turned  off
 
     //in the following n would be the number of the timer in general, x the channel
     //ICRn - Input Capture Register
@@ -91,8 +91,9 @@ void loop()
 
   if (a == '1'){changePeriod(1e-3);a='c';}
   if (a == '2'){changePeriod(2e-3);a='c';}
-  if (a == '0'){DDRB  = _BV(0);a='c';} // TURN OFF STIMULATION
-  if (a == '9'){DDRB  |= _BV(PB1);a='c';} //TURN ON STIMULATION
+  if (a == '0'){DDRB  = _BV(0);a='c'; Serial.println("TURNED OFF");} // TURN OFF STIMULATION
+  if (a == '9'){DDRB  |= _BV(PB1);a='c'; Serial.println("TURNED ON");} //TURN ON STIMULATION
+
   
   analogWrite(analogPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
 }
@@ -101,6 +102,6 @@ void loop()
 void changePeriod(float newPeriod)
 {
   ICR1   = round(newPeriod * F_TIMER) -1 ;
-  Serial.print("Period at: ");
-  Serial.println(newPeriod);
+  Serial.print("Period (ms): ");
+  Serial.println(newPeriod * 1000);
 }
