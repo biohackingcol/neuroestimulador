@@ -11,15 +11,22 @@
  * https://www.microchip.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_use_bv.html
  */
 
-//For testing use period=1e-3, width=0.5e-3
+//For testing use period=1e-3, width=0.5e-3 or 100e-6
 //For deployment use period=1, width=100e-6
 float PWM_PERIOD  = 1e-3;     // 1 s
 float p1 = 1;
 float p2 = 0.5;
+float pTest = 1e-3;
 float PULSE_WIDTH = 100e-6;//100e-6;  // 100 us
 int vdacPin = 10;
 int pulsePin = 9;
 char a;
+bool ON=LOW;
+int readPin = 7;
+int ledPin = 13;
+
+
+
 
 /*
  * With a 16 MHz clock and this prescaler, the resolution is 16 us and
@@ -48,8 +55,12 @@ void setup()
 
     NOT SURE IS THIS IS USEFUL IN ANYWAY...
     */
+    /* DDRB  |= _BV(PB1);*/
 
 analogWrite(vdacPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
+digitalWrite(pulsePin,HIGH); //start the device with the stimulus off, it seems like this works
+pinMode(readPin, INPUT);
+pinMode(ledPin, OUTPUT);
 
 //looks like analogwrite holds between loops
 }
@@ -71,40 +82,59 @@ void loop()
 
   if (a == '1')
     {
+      if(ON)
+      {
+      turnOff();
       setupTimer1(p1, PULSE_WIDTH, TIMER_PRESCALER);
+      Serial.println("TURNED ON"); //TURN ON STIMULATION
       //changePeriod(1e-3);
-      a='c';
+      
+      }
       /*We should turn off stimuli while chaging this because if you change periods rapidly it will send a direct current for a while and then change accordingly*/
+    a='c';
     }
   if (a == '2')
     {
+      if(ON)
+      {
+      turnOff();
       setupTimer1(p2, PULSE_WIDTH, TIMER_PRESCALER);
+      Serial.println("TURNED ON"); //TURN ON STIMULATION
       //changePeriod(2e-3);
+      }
       a='c';
     }
+    
   if (a == '0')
     {
-      //DDRB  = _BV(0); 
-      Serial.println("TURNED OFF"); // TURN OFF STIMULATION
-      //digitalWrite(pulsePin, LOW) ; //looks like this messes with the counter , dont use, it wont work for on-off
-      //digitalWrite(vdacPin, LOW);
-      //analogWrite(pulsePin,0);  //doesnt work
-      //OCR1A  = round(0.01e-3 * F_TIMER) -1 ;//when count is equal to OCR1A the ouput is set to clear (OFF) because of non-inverting compare output mode
-      //analogWrite(pulsePin, 0);
-      digitalWrite(pulsePin, LOW);
+      
+      turnOff();
       a='c';
     } 
   if (a == '9')
     {
       //DDRB  |= _BV(PB1);
-      Serial.println("TURNED ON"); //TURN ON STIMULATION
+      ON = HIGH;
       //analogWrite(vdacPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
-      setupTimer1(PWM_PERIOD, PULSE_WIDTH, TIMER_PRESCALER);
+      setupTimer1(pTest, PULSE_WIDTH, TIMER_PRESCALER);
+      Serial.println("TURNED ON"); //TURN ON STIMULATION
       a='c';
     } 
 
-  
-  
+  if(ON) 
+  {
+  if ( digitalRead(readPin) == HIGH) //digitalRead(pulsePin) messes the functioning, gotta do it on another pin
+  {
+    //Serial.println("tone"); //this wont allow to turn it off after maybe a problem reading the serial
+    //delay(500);
+    //ON = LOW; //this wont allow to change period, it is only to not overflow the serial, this should go to the buzzer anyway
+    //maybe do it on the pin 13 (led)
+
+    digitalWrite(ledPin, HIGH);
+    delay(500);//maybe is the dealay
+    digitalWrite(ledPin, LOW);
+  }
+  }
 }
 
 
@@ -117,6 +147,7 @@ void changePeriod(float newPeriod)
 
 void setupTimer1 (float PWM_PERIOD, float PULSE_WIDTH, uint16_t TIMER_PRESCALER) //with 256 prescaler
 {
+    //DO NOTE THAT THIS TURNS OFF THE STIMULI
     float F_TIMER = F_CPU / TIMER_PRESCALER;
     // Configure Timer 1.
     // |= -> (compound bitwise or)
@@ -142,9 +173,29 @@ void setupTimer1 (float PWM_PERIOD, float PULSE_WIDTH, uint16_t TIMER_PRESCALER)
                           // In non-inverting Compare Output mode, the Output Compare (OC1x) is cleared on the compare match between TCNT1 and OCR1x, and set at BOTTOM.
                           // That means that when TCNT1 is equal to OCR1A we get OFF, but when we get to the TOP and then resetted to the BOTTOM, at the BOTTOM we get ON. 
                           //COM1A0 ya que el transistor del swithce invierte la señal.
+                          //seems like inverting it also fixed the off part? (NOPE) sometimes it works, sometimes it doesnt
            | _BV(WGM11);  // fast PWM mode, TOP = ICR1
                           //The counter counts from BOTTOM to TOP then restarts from BOTTOM
     TCCR1B = _BV(WGM12)   // fast PWM mode, TOP = ICR1
            | _BV(WGM13)   // fast PWM mode, TOP = ICR1
            | _BV(CS12);   // clock at F_CPU/256 = 62.5 kHz, these chooses the prescaler
+
+    Serial.print("Period (ms): ");
+    Serial.println(PWM_PERIOD*1000);
+    Serial.print("Pulse Width (us): ");
+    Serial.println(PULSE_WIDTH*1000000);
+    
+}
+
+void turnOff(void)
+{
+      //DDRB  = _BV(0); 
+      ON = LOW;
+      Serial.println("TURNED OFF"); // TURN OFF STIMULATION
+      //digitalWrite(pulsePin, LOW) ; //looks like this messes with the counter , dont use, it wont work for on-off
+      //digitalWrite(vdacPin, LOW);
+      //analogWrite(pulsePin,0);  //doesnt work
+      //OCR1A  = round(0.01e-3 * F_TIMER) -1 ;//when count is equal to OCR1A the ouput is set to clear (OFF) because of non-inverting compare output mode
+      //analogWrite(pulsePin, 0);
+      digitalWrite(pulsePin, HIGH); //high because is switch is a not
 }
