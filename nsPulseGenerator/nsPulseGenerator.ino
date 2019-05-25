@@ -20,11 +20,18 @@ float pTest = 1e-3;
 float PULSE_WIDTH = 100e-6;//100e-6;  // 100 us
 int vdacPin = 10;
 int pulsePin = 9;
+int buzzerPin = 11;
 char a;
 bool ON=LOW;
 int readPin = 7;
 int ledPin = 13;
+int freq = 1000;
+bool sound = LOW;
 
+int detectPin = A0 ; 
+int long time2=0;
+int long time1=0;
+int delta = 0;
 
 
 
@@ -58,9 +65,12 @@ void setup()
     /* DDRB  |= _BV(PB1);*/
 
 analogWrite(vdacPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
-digitalWrite(pulsePin,HIGH); //start the device with the stimulus off, it seems like this works
+//digitalWrite(pulsePin,HIGH); //start the device with the stimulus off, it seems like this works
 pinMode(readPin, INPUT);
 pinMode(ledPin, OUTPUT);
+      ON = HIGH;
+      //analogWrite(vdacPin, 255); //write on (5 Volt?) for VDAC, 255 for always on, and the pin is well... the pin
+      setupTimer1(pTest, PULSE_WIDTH, TIMER_PRESCALER);
 
 //looks like analogwrite holds between loops
 }
@@ -106,8 +116,7 @@ void loop()
     }
     
   if (a == '0')
-    {
-      
+    {   
       turnOff();
       a='c';
     } 
@@ -119,21 +128,62 @@ void loop()
       setupTimer1(pTest, PULSE_WIDTH, TIMER_PRESCALER);
       Serial.println("TURNED ON"); //TURN ON STIMULATION
       a='c';
-    } 
+    }
 
-  if(ON) 
+  if (a == 's')
+  {
+    sound = !sound;
+    Serial.println("sound");
+    a = "c";
+  }
+
+  if (sound)
+  {
+    tone(buzzerPin, freq); // Send 1KHz sound signal...
+  }
+
+  else 
+  {
+    noTone(buzzerPin);
+  }
+
+
+  //Serial.println(pulseIn(readPin,LOW,50e-6));
+  
+  //if(ON) 
   {
   if ( digitalRead(readPin) == HIGH) //digitalRead(pulsePin) messes the functioning, gotta do it on another pin
   {
-    //Serial.println("tone"); //this wont allow to turn it off after maybe a problem reading the serial
+    Serial.println("tone"); //this wont allow to turn it off after maybe a problem reading the serial
     //delay(500);
     //ON = LOW; //this wont allow to change period, it is only to not overflow the serial, this should go to the buzzer anyway
     //maybe do it on the pin 13 (led)
 
     digitalWrite(ledPin, HIGH);
-    delay(500);//maybe is the dealay
+    
+    //delay(1000);        // ...for 1 sec
+  
+    //delay(500);//maybe is the dealay
+    
+  }
+  else
+  {
     digitalWrite(ledPin, LOW);
   }
+  }
+
+  if(analogRead(detectPin) >= HIGH)
+  {
+    time2=millis();
+    delta = time2 - time1;
+    Serial.print("current: ");
+    Serial.print(time2);
+    //Serial.println(time2);
+    Serial.print(" delta: ");
+    Serial.println(delta);
+    time1=time2; //correcion, al igualar a millis no es exactamente el tiempo anterior.
+    //por eso se iguala directamente a time2
+    //la correcion fue a partir de 2ArduinosPeriods1, las medidas de un solo arduino fueron con el codigo anterior
   }
 }
 
